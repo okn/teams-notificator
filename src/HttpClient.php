@@ -25,9 +25,10 @@ final class HttpClient
 
         $allHeaders = array_values(array_unique(array_merge($defaultHeaders, $headers)));
 
-        $json = json_encode($payload, JSON_UNESCAPED_UNICODE);
+        // Sustituye bytes UTF-8 inválidos (p. ej. textos de Jira) en lugar de fallar
+        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
         if ($json === false) {
-            throw new HttpRequestException('No se pudo convertir el payload a JSON.');
+            throw new HttpRequestException('No se pudo convertir el payload a JSON: ' . json_last_error_msg());
         }
 
         curl_setopt_array($ch, array(
