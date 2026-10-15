@@ -4,7 +4,7 @@ namespace LmsTeamsNotificator\Tests;
 
 use LmsTeamsNotificator\Logging\TeamsHandler;
 use LmsTeamsNotificator\Logging\TeamsLogger;
-use Monolog\Handler\NullHandler;
+use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 
@@ -83,9 +83,15 @@ class TeamsHandlerTest extends TestCase
 
     public function testObjectsAreShownByTheirClass()
     {
-        $this->logger(TeamsHandler::FORMAT_MESSAGE)->error('Failed', array('exception' => new \RuntimeException('x')));
+        $this->logger(TeamsHandler::FORMAT_MESSAGE)->error('Failed', array(
+            'exception' => new \RuntimeException('x'),
+            'user'      => new SerializableUser(),
+        ));
 
-        $this->assertSame(array('message' => "Failed\n\n**exception**: RuntimeException\n\n"), $this->onlyPayload());
+        $this->assertSame(
+            array('message' => "Failed\n\n**exception**: RuntimeException\n\n**user**: " . SerializableUser::class . "\n\n"),
+            $this->onlyPayload()
+        );
     }
 
     public function testRecordsBelowTheLevelAreNotPosted()
@@ -113,11 +119,15 @@ class TeamsHandlerTest extends TestCase
         $this->assertTrue($logger->getHandlers()[0]->isHandling($this->record(Logger::ERROR)));
     }
 
-    public function testTheLaravelChannelDiscardsRecordsWithoutAUrl()
+    public function testWithoutAUrlTheChannelLetsTheNextHandlersOfAStackReceiveTheRecords()
     {
-        $logger = (new TeamsLogger())(array('url' => null, 'level' => 'error'));
+        $next = new TestHandler();
+        $handlers = (new TeamsLogger())(array('url' => null, 'level' => 'error'))->getHandlers();
+        $stack = new Logger('stack', array_merge($handlers, array($next)));
 
-        $this->assertInstanceOf(NullHandler::class, $logger->getHandlers()[0]);
+        $stack->error('Message');
+
+        $this->assertTrue($next->hasErrorRecords());
     }
 
     /**

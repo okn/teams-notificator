@@ -153,8 +153,9 @@ class TeamsHandler extends AbstractProcessingHandler
     }
 
     /**
-     * Teams solo muestra texto: los objetos se identifican por su clase y el resto de
-     * valores que no son texto se muestran como JSON.
+     * Teams solo muestra texto: los objetos se identifican solo por su clase, para no
+     * enviar sus datos (un modelo serializable puede contener datos personales), y el
+     * resto de valores que no son texto se muestran como JSON.
      *
      * @param mixed $value
      * @param int $jsonFlags
@@ -166,7 +167,7 @@ class TeamsHandler extends AbstractProcessingHandler
             return $value;
         }
 
-        if (is_object($value) && !$value instanceof \JsonSerializable) {
+        if (is_object($value)) {
             return get_class($value);
         }
 

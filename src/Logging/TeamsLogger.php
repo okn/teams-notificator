@@ -2,7 +2,7 @@
 
 namespace LmsTeamsNotificator\Logging;
 
-use Monolog\Handler\NullHandler;
+use Monolog\Handler\NoopHandler;
 use Monolog\Logger;
 
 /**
@@ -17,7 +17,8 @@ use Monolog\Logger;
  *         'title'  => 'Mi aplicación', // opcional
  *     ],
  *
- * Sin URL, el canal descarta los registros, para que los entornos sin webhook sigan funcionando.
+ * Sin URL, el canal descarta los registros, para que los entornos sin webhook sigan funcionando,
+ * sin cortar la propagación a los siguientes canales de un stack.
  */
 class TeamsLogger
 {
@@ -30,7 +31,7 @@ class TeamsLogger
         $level = isset($config['level']) ? $config['level'] : 'debug';
 
         if (empty($config['url'])) {
-            return new Logger('teams', array(new NullHandler()));
+            return new Logger('teams', array(new NoopHandler()));
         }
 
         return new Logger('teams', array(
