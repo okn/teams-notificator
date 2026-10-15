@@ -4,7 +4,7 @@ namespace LmsTeamsNotificator;
 
 final class LmsTeamsNotificator
 {
-    /** @var HttpClient */
+    /** @var HttpClientInterface */
     private $httpClient;
 
     /** @var string */
@@ -16,10 +16,11 @@ final class LmsTeamsNotificator
     /**
      * @param string $message
      * @param string $webhookUrl
+     * @param HttpClientInterface|null $httpClient Cliente HTTP; por defecto, cURL
      */
-    public function __construct($message, $webhookUrl)
+    public function __construct($message, $webhookUrl, ?HttpClientInterface $httpClient = null)
     {
-        $this->httpClient = new HttpClient();
+        $this->httpClient = $httpClient ?: new HttpClient();
         $this->webhookUrl = $webhookUrl;
         $this->message = $message . "\n\n";
     }
