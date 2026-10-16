@@ -2,7 +2,7 @@
 
 namespace LmsTeamsNotificator;
 
-final class HttpClient
+final class HttpClient implements HttpClientInterface
 {
     /**
      * @param string $url

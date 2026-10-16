@@ -1,0 +1,24 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Monolog 2 on the PHP 7 versions used by the Laravel 7 projects, Monolog 3 from PHP 8.1.
+        php: ['7.2', '7.4', '8.1', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - run: composer update --no-interaction --no-progress
+      - run: composer show monolog/monolog | grep versions
+      - run: vendor/bin/phpunit
